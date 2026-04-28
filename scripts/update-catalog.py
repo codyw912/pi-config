@@ -84,7 +84,9 @@ def table(rows: list[list[str]]) -> str:
 
 def link(path: Path, label: str | None = None) -> str:
     r = rel(path)
-    return f"[`{label or r}`]({r})"
+    # docs/catalog.md lives one directory below repo root, so links to repo files
+    # need to climb back up to remain valid on GitHub.
+    return f"[`{label or r}`](../{r})"
 
 
 def package_link(source: str) -> str:

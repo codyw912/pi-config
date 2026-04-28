@@ -34,24 +34,24 @@ This setup includes a local snapshot of **34 skills** and **51 agents** installe
 
 | Extension | Purpose |
 | --- | --- |
-| [`council-tools.ts`](agent/extensions/council-tools.ts) | Council run browser, `Alt+O` overlay, `/council-runs`, `/council-open`, and async council artifact backfill. |
-| [`guard.ts`](agent/extensions/guard.ts) | Safety guardrails for risky shell/git commands and secret-decryption operations. |
-| [`pi-nopii.ts.disabled`](agent/extensions/pi-nopii.ts.disabled) | Disabled experimental local PII-filter extension; kept off by default. |
+| [`council-tools.ts`](../agent/extensions/council-tools.ts) | Council run browser, `Alt+O` overlay, `/council-runs`, `/council-open`, and async council artifact backfill. |
+| [`guard.ts`](../agent/extensions/guard.ts) | Safety guardrails for risky shell/git commands and secret-decryption operations. |
+| [`pi-nopii.ts.disabled`](../agent/extensions/pi-nopii.ts.disabled) | Disabled experimental local PII-filter extension; kept off by default. |
 
 ## Custom Local Agents
 
 | Agent | Purpose |
 | --- | --- |
-| [`council`](agent/agents/council.md) | Premium advisory council for hard decisions and ambiguous problems |
-| [`councillor-gemini`](agent/agents/councillor-gemini.md) | Premium council member focused on alternatives, edge cases, and broad-context synthesis |
-| [`councillor-gpt`](agent/agents/councillor-gpt.md) | Premium council member focused on execution practicality, trade-offs, and decision clarity |
-| [`councillor-opus`](agent/agents/councillor-opus.md) | Premium council member focused on architecture, invariants, and hidden risks |
+| [`council`](../agent/agents/council.md) | Premium advisory council for hard decisions and ambiguous problems |
+| [`councillor-gemini`](../agent/agents/councillor-gemini.md) | Premium council member focused on alternatives, edge cases, and broad-context synthesis |
+| [`councillor-gpt`](../agent/agents/councillor-gpt.md) | Premium council member focused on execution practicality, trade-offs, and decision clarity |
+| [`councillor-opus`](../agent/agents/councillor-opus.md) | Premium council member focused on architecture, invariants, and hidden risks |
 
 ## Custom Local Skills
 
 | Skill | Purpose |
 | --- | --- |
-| [`project-cockpit`](agent/skills/project-cockpit/SKILL.md) | Initialize, read, steward, wrap, or resume a lightweight `.project/` cockpit for durable human-agent project continuity. Use when the user asks to initialize project tracking, refresh project state, wrap a session, resume from project state, steward the project cockpit, choose the next chunk, or run Momentum/Advisory/Steward modes. This is user-owned local workflow glue and must not patch CE/vendor-managed skills. |
-| [`semantic-compression`](agent/skills/semantic-compression/SKILL.md) | Aggressively remove grammatical scaffolding LLMs reconstruct while preserving meaning-carrying content. Output may be fragments. Use when compressing text for prompts, reducing token count, preparing context for LLM input, or making documentation more token-efficient. Applies LLM-aware compression rules that delete predictable grammar while preserving semantics. |
-| [`system-prompts`](agent/skills/system-prompts/SKILL.md) | Write system prompts, tool docs, and agent definitions. Combines research-backed prompt engineering (+15-30% measured improvements) with project XML conventions. Covers tag hierarchy, structural templates, high-impact interventions, anti-patterns. |
-| [`zig`](agent/skills/zig/SKILL.md) | Write, review, refactor, migrate, or debug idiomatic Zig 0.16.0 code. Use for Zig source, build.zig/build.zig.zon, std.Io migrations, allocator ownership, error handling, tests, C interop, and code-review checklists. |
+| [`project-cockpit`](../agent/skills/project-cockpit/SKILL.md) | Initialize, read, steward, wrap, or resume a lightweight `.project/` cockpit for durable human-agent project continuity. Use when the user asks to initialize project tracking, refresh project state, wrap a session, resume from project state, steward the project cockpit, choose the next chunk, or run Momentum/Advisory/Steward modes. This is user-owned local workflow glue and must not patch CE/vendor-managed skills. |
+| [`semantic-compression`](../agent/skills/semantic-compression/SKILL.md) | Aggressively remove grammatical scaffolding LLMs reconstruct while preserving meaning-carrying content. Output may be fragments. Use when compressing text for prompts, reducing token count, preparing context for LLM input, or making documentation more token-efficient. Applies LLM-aware compression rules that delete predictable grammar while preserving semantics. |
+| [`system-prompts`](../agent/skills/system-prompts/SKILL.md) | Write system prompts, tool docs, and agent definitions. Combines research-backed prompt engineering (+15-30% measured improvements) with project XML conventions. Covers tag hierarchy, structural templates, high-impact interventions, anti-patterns. |
+| [`zig`](../agent/skills/zig/SKILL.md) | Write, review, refactor, migrate, or debug idiomatic Zig 0.16.0 code. Use for Zig source, build.zig/build.zig.zon, std.Io migrations, allocator ownership, error handling, tests, C interop, and code-review checklists. |
