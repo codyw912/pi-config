@@ -28,6 +28,19 @@ Do not commit these from `~/.pi/agent`:
 
 ## Install
 
+### 1. Install package dependencies
+
+Pi packages installed from npm/git are not vendored into this repo. Install them from their source refs:
+
+```bash
+./scripts/install-packages.sh --dry-run
+./scripts/install-packages.sh
+```
+
+The package list lives in `config/pi-packages.txt`. Optional/discovered packages that are not part of the default stack live in `config/pi-packages.optional.txt`.
+
+### 2. Symlink curated local config
+
 Dry-run first:
 
 ```bash

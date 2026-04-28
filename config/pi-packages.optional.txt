@@ -1,0 +1,5 @@
+# Packages discovered in the local Pi git cache but not currently listed in settings.json.
+# Review before installing; these may be old experiments or disabled packages.
+
+git:github.com/davebcn87/pi-autoresearch
+git:github.com/samfoy/pi-lsp-extension

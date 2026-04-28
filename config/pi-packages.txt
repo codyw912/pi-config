@@ -1,0 +1,11 @@
+# Pi packages to install for this config.
+# Lines beginning with # are ignored by scripts/install-packages.sh.
+
+npm:pi-web-access
+npm:pi-subagents
+npm:pi-ask-user
+npm:@yofriadi/pi-lsp
+npm:@ujjwalgrover/pi-catppuccin
+npm:pi-intercom
+npm:@ff-labs/pi-fff
+git:github.com/IgorWarzocha/pi-auto-reasoning-tool

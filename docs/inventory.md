@@ -14,6 +14,16 @@ Created: 2026-04-28
 
 Approximate copied size at initial transition: ~2.4 MB across ~213 files before removing cross-harness common skills that belong in `~/.agents/skills`.
 
+## Package-managed extensions
+
+Extensions cloned under `~/.pi/agent/git/` are Pi package installs/caches. They are intentionally not vendored into this repo. Instead, this repo tracks source references:
+
+- `config/pi-packages.txt` — default package set to install with `pi install`.
+- `config/pi-packages.optional.txt` — discovered local git-cache packages not currently part of the default stack.
+- `scripts/install-packages.sh` — installs package refs from either file.
+
+This lets Pi recreate `~/.pi/agent/git/...` cleanly from upstream package sources and avoids committing cloned repositories, `node_modules`, lock/cache state, or stale experiments.
+
 ## Explicitly excluded
 
 These are intentionally not copied and should not be committed:
