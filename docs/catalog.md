@@ -47,6 +47,29 @@ This setup includes a local snapshot of **34 skills** and **51 agents** installe
 | [`councillor-gpt`](../agent/agents/councillor-gpt.md) | Premium council member focused on execution practicality, trade-offs, and decision clarity |
 | [`councillor-opus`](../agent/agents/councillor-opus.md) | Premium council member focused on architecture, invariants, and hidden risks |
 
+## Shared Cross-Harness Skills
+
+These are tracked here for visibility, but are intended to live in `~/.agents/skills` so Pi and other harnesses can auto-discover them from the common location.
+
+| Skill | Purpose |
+| --- | --- |
+| [`agent-browser`](../shared-skills/agent-browser/SKILL.md) | Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages. |
+| [`ask-questions-if-underspecified`](../shared-skills/ask-questions-if-underspecified/SKILL.md) | Clarify requirements before implementing. Do not use automatically, only when invoked explicitly. |
+| [`ast-grep`](../shared-skills/ast-grep/SKILL.md) | Guide for writing ast-grep rules to perform structural code search and analysis. Use when users need to search codebases using Abstract Syntax Tree (AST) patterns, find specific code structures, or perform complex code queries that go beyond simple text search. This skill should be used when users ask to search for code patterns, find specific language constructs, or locate code with particular structural characteristics. |
+| [`brainstorming`](../shared-skills/brainstorming/SKILL.md) | You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation. |
+| [`find-skills`](../shared-skills/find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill. |
+| [`grill-me`](../shared-skills/grill-me/SKILL.md) | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions "grill me". |
+| [`improve-codebase-architecture`](../shared-skills/improve-codebase-architecture/SKILL.md) | Find deepening opportunities in a codebase, informed by the domain language in CONTEXT.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable. |
+| [`logging-best-practices`](../shared-skills/logging-best-practices/SKILL.md) | Logging best practices focused on wide events (canonical log lines) for powerful debugging and analytics |
+| [`python-performance-optimization`](../shared-skills/python-performance-optimization/SKILL.md) | Profile and optimize Python code using cProfile, memory profilers, and performance best practices. Use when debugging slow Python code, optimizing bottlenecks, or improving application performance. |
+| [`rust-magic-linter`](../shared-skills/rust-magic-linter/SKILL.md) | Add strict Clippy lint configurations to Rust projects for AI-assisted development. Use when the user wants to add Clippy lints, AI guardrails, or rust-magic-linter to a Rust project. Supports three presets (minimal, standard, maximum) that enforce best practices and prevent common AI coding mistakes like using unwrap(), silencing warnings with #[allow()], or leaving debug code. |
+| [`simplify`](../shared-skills/simplify/SKILL.md) | Simplify and refine recently modified code for clarity and consistency. Use after writing code to improve readability without changing functionality. |
+| [`tdd`](../shared-skills/tdd/SKILL.md) | Test-driven development with red-green-refactor loop. Use when user wants to build features or fix bugs using TDD, mentions "red-green-refactor", wants integration tests, or asks for test-first development. |
+| [`ubiquitous-language`](../shared-skills/ubiquitous-language/SKILL.md) | Extract a DDD-style ubiquitous language glossary from the current conversation, flagging ambiguities and proposing canonical terms. Saves to UBIQUITOUS_LANGUAGE.md. Use when user wants to define domain terms, build a glossary, harden terminology, create a ubiquitous language, or mentions "domain model" or "DDD". |
+| [`uv-python-commands`](../shared-skills/uv-python-commands/SKILL.md) | Run Python via uv run to avoid touching system Python. Use for one-off execution (scripts, inline commands, stdin/heredocs) and ephemeral deps; avoid system-wide installs. |
+| [`uv-python-projects`](../shared-skills/uv-python-projects/SKILL.md) | Manage uv for Python projects: initialize projects, manage dependencies/groups/extras, lock and sync environments, workspaces, and Python versions. Use when working in a repo with a pyproject.toml or when setting up and maintaining project environments; not for one-off runs. |
+| [`uv-python-scripts`](../shared-skills/uv-python-scripts/SKILL.md) | Manage standalone Python scripts with uv using PEP 723 metadata, script dependencies, shebang execution, lockfiles, and reproducibility controls. |
+
 ## Custom Local Skills
 
 | Skill | Purpose |

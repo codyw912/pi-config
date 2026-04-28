@@ -1,0 +1,22 @@
+# ============================================
+# MINIMAL PRESET
+# ============================================
+# Just the critical AI guardrails - prevents panics and cheating
+# Use this for quick safety without changing much existing code
+#
+# Add to your Cargo.toml:
+# [lints.clippy]
+# ... (copy contents below)
+
+[lints.clippy]
+# Panic safety - the bare minimum for AI agents
+unwrap_used = "deny"              # No hidden panics from Option::unwrap()
+expect_used = "deny"              # No hidden panics from Option::expect()
+panic = "deny"                    # No explicit panic!() calls
+
+# The "no cheating" rule - AI can't silence warnings
+allow_attributes = "deny"         # Can't use #[allow(clippy::...)]
+
+# Code hygiene - no debug leftovers
+dbg_macro = "deny"                # No dbg!() in production
+todo = "deny"                     # No incomplete code markers

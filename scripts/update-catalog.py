@@ -162,6 +162,20 @@ def generate() -> str:
     lines.append(table(agent_rows))
     lines.append("")
 
+    # Shared cross-harness skills
+    shared_rows = [["Skill", "Purpose"]]
+    for path in sorted((ROOT / "shared-skills").glob("*/SKILL.md")):
+        fm = frontmatter(path)
+        name = fm.get("name") or path.parent.name
+        desc = fm.get("description") or first_heading_or_description(path)
+        shared_rows.append([link(path, name), desc])
+    lines.append("## Shared Cross-Harness Skills")
+    lines.append("")
+    lines.append("These are tracked here for visibility, but are intended to live in `~/.agents/skills` so Pi and other harnesses can auto-discover them from the common location.")
+    lines.append("")
+    lines.append(table(shared_rows))
+    lines.append("")
+
     # Skills
     skill_rows = [["Skill", "Purpose"]]
     skill_paths = sorted((ROOT / "agent/skills").glob("*/SKILL.md"))

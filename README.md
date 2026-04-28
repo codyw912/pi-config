@@ -25,11 +25,12 @@ Highlights:
 - `agent/APPEND_SYSTEM.md` — appended system prompt / operating guidance.
 - `agent/agents/` — local subagent definitions.
 - `agent/skills/` — Pi/CE-specific local skills.
+- `shared-skills/` — cross-harness skills mirrored from `~/.agents/skills` for visibility and sharing.
 - `agent/extensions/` — local Pi extensions.
 - `config/pi-packages.txt` — default npm/git Pi package dependencies.
 - `config/pi-packages.optional.txt` — optional/discovered package refs.
 
-Common cross-harness skills should live in `~/.agents/skills`, not in this repo. Pi discovers those directly, and other harnesses can share them from the same location.
+Common cross-harness skills are tracked in `shared-skills/` but should live at `~/.agents/skills` on each machine. Pi discovers that location directly, and other harnesses can share it too.
 
 ## Excluded
 
@@ -56,7 +57,16 @@ Pi packages installed from npm/git are not vendored into this repo. Install them
 
 The package list lives in `config/pi-packages.txt`. Optional/discovered packages that are not part of the default stack live in `config/pi-packages.optional.txt`.
 
-### 2. Symlink curated local config
+### 2. Install shared cross-harness skills
+
+These copy to `~/.agents/skills`, where Pi and other harnesses auto-discover them:
+
+```bash
+./scripts/install-shared-skills.sh --dry-run
+./scripts/install-shared-skills.sh
+```
+
+### 3. Symlink curated local config
 
 Dry-run first:
 
@@ -80,12 +90,20 @@ After installing, reload Pi:
 
 ## Maintain the catalog
 
-Regenerate the catalog after adding/removing agents, skills, extensions, or packages:
+Regenerate the catalog after adding/removing agents, skills, extensions, packages, or shared skills:
 
 ```bash
 python3 scripts/update-catalog.py
 # or
 npm run catalog
+```
+
+To refresh the tracked shared-skill mirror from your machine's common skill directory:
+
+```bash
+./scripts/sync-shared-skills.sh --dry-run
+./scripts/sync-shared-skills.sh
+python3 scripts/update-catalog.py
 ```
 
 ## Update workflow

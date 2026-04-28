@@ -78,6 +78,8 @@ link_path "skills"
 link_path "extensions"
 
 say ""
+say "Note: shared cross-harness skills live in $ROOT/shared-skills."
+say "Pi auto-discovers skills from ~/.agents/skills, so copy or sync those separately if desired."
 if [ "$DRY_RUN" -eq 1 ]; then
   say "Dry run complete. No files changed."
 else
