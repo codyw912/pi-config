@@ -1,0 +1,495 @@
+import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import { spawn } from "node:child_process";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import net from "node:net";
+import os from "node:os";
+import path from "node:path";
+
+interface JsonRpcResponse {
+  jsonrpc?: "2.0";
+  id: string;
+  result?: any;
+  error?: { code?: number; message?: string };
+}
+
+interface Span {
+  label: string;
+  start: number;
+  end: number;
+  text?: string;
+  score?: number;
+}
+
+interface DetectionResult {
+  results: Array<{ spans: Span[] }>;
+  backend?: BackendStatus;
+}
+
+interface BackendStatus {
+  ok?: boolean;
+  status?: "starting" | "warming" | "ready" | "error" | string;
+  error?: string | null;
+  engine?: string;
+  runtime?: string;
+  model?: string;
+  pid?: number;
+  active_connections?: number;
+  load_seconds?: number | null;
+  total_requests?: number;
+  total_detections?: number;
+}
+
+interface PendingRequest {
+  resolve: (value: any) => void;
+  reject: (error: Error) => void;
+  timeout: NodeJS.Timeout;
+}
+
+const EXTENSION_ID = "nopii";
+const BASE_DIR = path.join(os.homedir(), ".pi", "agent", "nopii");
+const DEFAULT_SOCKET = path.join(BASE_DIR, "nopii-openmed-mlx.sock");
+const DEFAULT_HELPER = path.join(BASE_DIR, "openmed_mlx_server.py");
+const DEFAULT_LOG = path.join(BASE_DIR, "nopii-server.log");
+
+function envFlag(name: string, defaultValue: boolean): boolean {
+  const raw = process.env[name];
+  if (raw == null || raw === "") return defaultValue;
+  return !["0", "false", "no", "off"].includes(raw.toLowerCase());
+}
+
+function envNumber(name: string, defaultValue: number): number {
+  const raw = process.env[name];
+  if (!raw) return defaultValue;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : defaultValue;
+}
+
+function sha256(text: string): string {
+  return crypto.createHash("sha256").update(text).digest("hex");
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isConnectMissing(error: NodeJS.ErrnoException): boolean {
+  return error.code === "ENOENT" || error.code === "ECONNREFUSED" || error.code === "EPIPE";
+}
+
+function isTransientConnectionError(error: unknown): boolean {
+  const err = error as NodeJS.ErrnoException;
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    isConnectMissing(err) ||
+    message.includes("EPIPE") ||
+    message.includes("connection closed") ||
+    message.includes("disconnected") ||
+    message.includes("not connected")
+  );
+}
+
+function applyRedactions(text: string, spans: Span[]): string {
+  const counts = new Map<string, number>();
+  const sorted = [...spans]
+    .filter((span) => Number.isInteger(span.start) && Number.isInteger(span.end))
+    .sort((a, b) => a.start - b.start || b.end - a.end);
+
+  let cursor = 0;
+  const pieces: string[] = [];
+  for (const span of sorted) {
+    if (span.start < cursor || span.end <= span.start || span.start < 0 || span.end > text.length) continue;
+    const label = span.label || "redacted";
+    const nextCount = (counts.get(label) ?? 0) + 1;
+    counts.set(label, nextCount);
+    pieces.push(text.slice(cursor, span.start));
+    pieces.push(`<${label.toUpperCase()}_${nextCount}>`);
+    cursor = span.end;
+  }
+  pieces.push(text.slice(cursor));
+  return pieces.join("");
+}
+
+function collectTextMutators(messages: any[]): Array<{ text: string; set: (value: string) => void }> {
+  const mutators: Array<{ text: string; set: (value: string) => void }> = [];
+
+  for (const message of messages) {
+    if (!message || typeof message !== "object") continue;
+
+    if (message.role === "user") {
+      if (typeof message.content === "string") {
+        mutators.push({ text: message.content, set: (value) => { message.content = value; } });
+      } else if (Array.isArray(message.content)) {
+        for (const block of message.content) {
+          if (block?.type === "text" && typeof block.text === "string") {
+            mutators.push({ text: block.text, set: (value) => { block.text = value; } });
+          }
+        }
+      }
+    }
+
+    if (message.role === "assistant" && Array.isArray(message.content)) {
+      for (const block of message.content) {
+        if (block?.type === "text" && typeof block.text === "string") {
+          mutators.push({ text: block.text, set: (value) => { block.text = value; } });
+        }
+      }
+    }
+
+    if (message.role === "toolResult" && Array.isArray(message.content)) {
+      for (const block of message.content) {
+        if (block?.type === "text" && typeof block.text === "string") {
+          mutators.push({ text: block.text, set: (value) => { block.text = value; } });
+        }
+      }
+    }
+  }
+
+  return mutators.filter((mutator) => mutator.text.length > 0);
+}
+
+class SharedBackendClient {
+  private socket?: net.Socket;
+  private buffer = "";
+  private nextId = 1;
+  private pending = new Map<string, PendingRequest>();
+  private connectPromise?: Promise<void>;
+  private warnedUnavailable = false;
+  private lastSpawnAt = 0;
+  private currentStatus: BackendStatus = { status: "starting" };
+
+  private readonly socketPath = process.env.PI_NOPII_SOCKET || DEFAULT_SOCKET;
+  private readonly helperPath = process.env.PI_NOPII_HELPER || DEFAULT_HELPER;
+  private readonly model = process.env.PI_NOPII_MODEL || "OpenMed/privacy-filter-mlx-8bit";
+  private readonly command = process.env.PI_NOPII_UV || "uv";
+  private readonly idleTimeout = envNumber("PI_NOPII_IDLE_TIMEOUT_SECONDS", 300);
+  private readonly requestTimeoutMs = envNumber("PI_NOPII_REQUEST_TIMEOUT_MS", 30_000);
+  private readonly connectTimeoutMs = envNumber("PI_NOPII_CONNECT_TIMEOUT_MS", 10_000);
+
+  status(): BackendStatus {
+    return this.currentStatus;
+  }
+
+  statusText(): string {
+    const status = this.currentStatus.status ?? "unknown";
+    if (status === "ready") return `connected · ${this.currentStatus.runtime ?? "backend"}`;
+    if (status === "warming") return "warming...";
+    if (status === "error") return "error";
+    if (this.socket) return status;
+    return "disconnected";
+  }
+
+  async ensureConnected(ctx?: any): Promise<void> {
+    if (this.socket && !this.socket.destroyed) return;
+    if (this.connectPromise) return this.connectPromise;
+
+    this.connectPromise = this.connectOrStart(ctx).finally(() => {
+      this.connectPromise = undefined;
+    });
+    return this.connectPromise;
+  }
+
+  disconnect(): void {
+    for (const [id, pending] of this.pending) {
+      clearTimeout(pending.timeout);
+      pending.reject(new Error("NoPII backend disconnected"));
+      this.pending.delete(id);
+    }
+    this.socket?.end();
+    this.socket?.destroy();
+    this.socket = undefined;
+  }
+
+  async initialize(): Promise<BackendStatus> {
+    const result = await this.request("initialize", {}, 5_000) as BackendStatus;
+    this.currentStatus = result;
+    return result;
+  }
+
+  async detect(texts: string[]): Promise<DetectionResult> {
+    try {
+      const result = await this.request("detect", { texts }, this.requestTimeoutMs) as DetectionResult;
+      if (result.backend) this.currentStatus = result.backend;
+      return result;
+    } catch (error) {
+      if (!isTransientConnectionError(error)) throw error;
+      this.disconnect();
+      await this.ensureConnected();
+      const result = await this.request("detect", { texts }, this.requestTimeoutMs) as DetectionResult;
+      if (result.backend) this.currentStatus = result.backend;
+      return result;
+    }
+  }
+
+  async statusRequest(): Promise<BackendStatus> {
+    await this.ensureConnected();
+    return this.initialize();
+  }
+
+  async notifyUnavailable(ctx: any, detail: string): Promise<void> {
+    this.currentStatus = { status: "error", error: detail };
+    this.setUiStatus(ctx);
+    if (this.warnedUnavailable) return;
+    this.warnedUnavailable = true;
+    ctx?.ui?.notify?.(`pi-nopii unavailable: ${detail}. Text will pass through unredacted.`, "warning");
+  }
+
+  setUiStatus(ctx: any): void {
+    ctx?.ui?.setStatus?.(EXTENSION_ID, `nopii: ${this.statusText()}`);
+  }
+
+  private async connectOrStart(ctx?: any): Promise<void> {
+    try {
+      await this.connectOnce();
+      await this.initialize().catch(() => undefined);
+      this.setUiStatus(ctx);
+      return;
+    } catch (error) {
+      const err = error as NodeJS.ErrnoException;
+      if (!isConnectMissing(err)) throw error;
+    }
+
+    this.spawnBackend(ctx);
+    const deadline = Date.now() + this.connectTimeoutMs;
+    let lastError: unknown;
+    while (Date.now() < deadline) {
+      try {
+        await this.connectOnce();
+        await this.initialize().catch(() => undefined);
+        this.setUiStatus(ctx);
+        return;
+      } catch (error) {
+        lastError = error;
+        await sleep(150);
+      }
+    }
+    throw lastError instanceof Error ? lastError : new Error("timed out connecting to NoPII backend");
+  }
+
+  private connectOnce(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const socket = net.createConnection(this.socketPath);
+      let settled = false;
+      const timeout = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        socket.destroy();
+        reject(new Error(`timed out connecting to ${this.socketPath}`));
+      }, 2_000);
+
+      socket.setEncoding("utf8");
+      socket.once("connect", () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        this.attachSocket(socket);
+        resolve();
+      });
+      socket.once("error", (error) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        socket.destroy();
+        reject(error);
+      });
+    });
+  }
+
+  private attachSocket(socket: net.Socket): void {
+    this.socket = socket;
+    this.buffer = "";
+    socket.on("data", (chunk) => this.onData(String(chunk)));
+    socket.on("close", () => this.onClose());
+    socket.on("error", () => undefined);
+  }
+
+  private onData(chunk: string): void {
+    this.buffer += chunk;
+    while (true) {
+      const newline = this.buffer.indexOf("\n");
+      if (newline === -1) return;
+      const line = this.buffer.slice(0, newline);
+      this.buffer = this.buffer.slice(newline + 1);
+      if (!line.trim()) continue;
+      let response: JsonRpcResponse;
+      try {
+        response = JSON.parse(line);
+      } catch {
+        continue;
+      }
+      const pending = this.pending.get(String(response.id));
+      if (!pending) continue;
+      clearTimeout(pending.timeout);
+      this.pending.delete(String(response.id));
+      if (response.error) pending.reject(new Error(response.error.message || "NoPII backend error"));
+      else pending.resolve(response.result);
+    }
+  }
+
+  private onClose(): void {
+    this.socket = undefined;
+    this.currentStatus = { status: "starting" };
+    for (const [id, pending] of this.pending) {
+      clearTimeout(pending.timeout);
+      pending.reject(new Error("NoPII backend connection closed"));
+      this.pending.delete(id);
+    }
+  }
+
+  private request(method: string, params: any, timeoutMs: number): Promise<any> {
+    if (!this.socket || this.socket.destroyed) return Promise.reject(new Error("NoPII backend is not connected"));
+    const id = String(this.nextId++);
+    const payload = JSON.stringify({ jsonrpc: "2.0", id, method, params }) + "\n";
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`NoPII backend ${method} timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+      this.pending.set(id, { resolve, reject, timeout });
+      this.socket!.write(payload, "utf8", (error) => {
+        if (!error) return;
+        clearTimeout(timeout);
+        this.pending.delete(id);
+        reject(error);
+      });
+    });
+  }
+
+  private spawnBackend(ctx?: any): void {
+    const now = Date.now();
+    if (now - this.lastSpawnAt < 2_000) return;
+    this.lastSpawnAt = now;
+
+    fs.mkdirSync(path.dirname(this.socketPath), { recursive: true });
+    if (!fs.existsSync(this.helperPath)) {
+      throw new Error(`NoPII helper not found: ${this.helperPath}`);
+    }
+
+    this.currentStatus = { status: "warming", model: this.model, runtime: "mlx", engine: "openmed" };
+    this.setUiStatus(ctx);
+
+    const args = [
+      "run",
+      "--isolated",
+      "--with",
+      "openmed[mlx]",
+      this.helperPath,
+      "serve",
+      "--socket",
+      this.socketPath,
+      "--model",
+      this.model,
+      "--idle-timeout",
+      String(this.idleTimeout),
+      "--log-file",
+      process.env.PI_NOPII_LOG || DEFAULT_LOG,
+    ];
+
+    const child = spawn(this.command, args, {
+      detached: true,
+      stdio: "ignore",
+      env: { ...process.env },
+    });
+    child.unref();
+  }
+}
+
+const backend = new SharedBackendClient();
+const enabled = envFlag("PI_NOPII_ENABLED", true);
+const backgroundPreload = envFlag("PI_NOPII_BACKGROUND_PRELOAD", true);
+const redactionCache = new Map<string, { redacted: string; spanCount: number }>();
+
+async function redactTexts(texts: string[], ctx: any): Promise<Map<string, { redacted: string; spanCount: number }>> {
+  const result = new Map<string, { redacted: string; spanCount: number }>();
+  const misses: string[] = [];
+
+  for (const text of texts) {
+    const key = sha256(text);
+    const cached = redactionCache.get(key);
+    if (cached) result.set(text, cached);
+    else misses.push(text);
+  }
+
+  if (misses.length === 0) return result;
+
+  await backend.ensureConnected(ctx);
+  const detection = await backend.detect(misses);
+  detection.results.forEach((item, index) => {
+    const original = misses[index];
+    const redacted = applyRedactions(original, item.spans || []);
+    const value = { redacted, spanCount: item.spans?.length ?? 0 };
+    redactionCache.set(sha256(original), value);
+    result.set(original, value);
+  });
+  return result;
+}
+
+export default function piNopiiExtension(pi: ExtensionAPI) {
+  if (!enabled) return;
+
+  pi.on("session_start", async (_event, ctx) => {
+    backend.setUiStatus(ctx);
+    if (backgroundPreload) {
+      void backend.ensureConnected(ctx)
+        .then(() => backend.initialize())
+        .then(() => backend.setUiStatus(ctx))
+        .catch((error) => backend.notifyUnavailable(ctx, error instanceof Error ? error.message : String(error)));
+    }
+  });
+
+  pi.on("session_shutdown", async () => {
+    // Do not kill the shared backend here. Other Pi instances may be using it.
+    // Closing this persistent socket lets the backend observe zero clients and exit after its idle timeout.
+    backend.disconnect();
+  });
+
+  pi.on("context", async (event, ctx) => {
+    const mutators = collectTextMutators(event.messages as any[]);
+    if (mutators.length === 0) return { messages: event.messages };
+
+    backend.setUiStatus(ctx);
+    try {
+      const uniqueTexts = [...new Set(mutators.map((mutator) => mutator.text))];
+      const redactions = await redactTexts(uniqueTexts, ctx);
+      let spanCount = 0;
+      for (const mutator of mutators) {
+        const redaction = redactions.get(mutator.text);
+        if (!redaction) continue;
+        mutator.set(redaction.redacted);
+        spanCount += redaction.spanCount;
+      }
+      backend.setUiStatus(ctx);
+      if (spanCount > 0) ctx.ui?.setStatus?.(EXTENSION_ID, `nopii: redacted ${spanCount} span${spanCount === 1 ? "" : "s"}`);
+      return { messages: event.messages };
+    } catch (error) {
+      await backend.notifyUnavailable(ctx, error instanceof Error ? error.message : String(error));
+      return { messages: event.messages };
+    }
+  });
+
+  pi.registerCommand("nopii", {
+    description: "Show pi-nopii backend status",
+    handler: async (args, ctx) => {
+      const trimmed = args.trim();
+      if (trimmed.startsWith("test")) {
+        const text = trimmed.slice(4).trim() || "Alice emailed alice@example.com";
+        try {
+          const redactions = await redactTexts([text], ctx);
+          const redaction = redactions.get(text);
+          ctx.ui.notify(redaction ? redaction.redacted : "No redaction result", "info");
+        } catch (error) {
+          ctx.ui.notify(`nopii test failed: ${error instanceof Error ? error.message : String(error)}`, "error");
+        }
+        return;
+      }
+
+      try {
+        const status = await backend.statusRequest();
+        ctx.ui.notify(`nopii: ${JSON.stringify(status, null, 2)}`, "info");
+        backend.setUiStatus(ctx);
+      } catch (error) {
+        ctx.ui.notify(`nopii unavailable: ${error instanceof Error ? error.message : String(error)}`, "warning");
+      }
+    },
+  });
+}

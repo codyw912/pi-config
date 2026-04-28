@@ -1,0 +1,27 @@
+# Pi private/runtime state
+agent/sessions/
+agent/git/
+agent/.cache/
+agent/bench-reports/
+agent/intercom/
+agent/run-history.jsonl
+agent/auth.json
+agent/settings.json
+agent/settings*.json
+agent/models.json
+agent/lsp.json
+agent/.pi-lsp.json
+
+# Local backups created by install.sh
+.backups/
+
+# OS/editor noise
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Logs/temp
+*.log
+tmp/
+.cache/

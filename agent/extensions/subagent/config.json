@@ -1,0 +1,10 @@
+{
+  "parallel": {
+    "maxTasks": 8,
+    "concurrency": 4
+  },
+  "defaultSessionDir": "~/.pi/agent/sessions/subagent",
+  "intercomBridge": {
+    "mode": "always"
+  }
+}
