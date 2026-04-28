@@ -20,6 +20,7 @@ Extensions cloned under `~/.pi/agent/git/` are Pi package installs/caches. They 
 
 - `config/pi-packages.txt` — default package set to install with `pi install`.
 - `config/pi-packages.optional.txt` — discovered local git-cache packages not currently part of the default stack.
+- `docs/pi-packages.md` — first-class package inventory with source links and purpose notes.
 - `scripts/install-packages.sh` — installs package refs from either file.
 
 This lets Pi recreate `~/.pi/agent/git/...` cleanly from upstream package sources and avoids committing cloned repositories, `node_modules`, lock/cache state, or stale experiments.

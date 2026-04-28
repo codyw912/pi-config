@@ -37,7 +37,7 @@ Pi packages installed from npm/git are not vendored into this repo. Install them
 ./scripts/install-packages.sh
 ```
 
-The package list lives in `config/pi-packages.txt`. Optional/discovered packages that are not part of the default stack live in `config/pi-packages.optional.txt`.
+The package list lives in `config/pi-packages.txt`. Optional/discovered packages that are not part of the default stack live in `config/pi-packages.optional.txt`. See `docs/pi-packages.md` for first-class package tracking, source links, and notes.
 
 ### 2. Symlink curated local config
 
