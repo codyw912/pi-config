@@ -29,6 +29,8 @@ EXTENSION_PURPOSES = {
     "pi-nopii.ts.disabled": "Disabled experimental local PII-filter extension; kept off by default.",
 }
 
+CE_REPO = "https://github.com/EveryInc/compound-engineering-plugin"
+
 
 def frontmatter(path: Path) -> dict[str, str]:
     text = path.read_text(errors="ignore")
@@ -123,6 +125,18 @@ def generate() -> str:
     lines.append(table(optional_rows))
     lines.append("")
 
+    # Compound Engineering resources
+    ce_agent_count = len(list((ROOT / "agent/agents").glob("ce-*.md")))
+    ce_skill_count = len(list((ROOT / "agent/skills").glob("ce-*/SKILL.md")))
+    lines.append("## Compound Engineering Resources")
+    lines.append("")
+    lines.append(
+        f"This setup includes a local snapshot of **{ce_skill_count} skills** and **{ce_agent_count} agents** installed by the "
+        f"[Compound Engineering plugin]({CE_REPO}). They are treated as upstream plugin resources, not custom pi-config items. "
+        "See the official CE repository for the canonical source, docs, and update flow."
+    )
+    lines.append("")
+
     # Extensions
     ext_rows = [["Extension", "Purpose"]]
     for path in sorted((ROOT / "agent/extensions").glob("*.ts")) + sorted((ROOT / "agent/extensions").glob("*.disabled")):
@@ -135,11 +149,13 @@ def generate() -> str:
     # Agents
     agent_rows = [["Agent", "Purpose"]]
     for path in sorted((ROOT / "agent/agents").glob("*.md")):
+        if path.name.startswith("ce-"):
+            continue
         fm = frontmatter(path)
         name = fm.get("name") or path.stem
         desc = fm.get("description") or first_heading_or_description(path)
         agent_rows.append([link(path, name), desc])
-    lines.append("## Local Agents")
+    lines.append("## Custom Local Agents")
     lines.append("")
     lines.append(table(agent_rows))
     lines.append("")
@@ -148,11 +164,13 @@ def generate() -> str:
     skill_rows = [["Skill", "Purpose"]]
     skill_paths = sorted((ROOT / "agent/skills").glob("*/SKILL.md"))
     for path in skill_paths:
+        if path.parent.name.startswith("ce-") or path.parent.name == "lfg":
+            continue
         fm = frontmatter(path)
         name = fm.get("name") or path.parent.name
         desc = fm.get("description") or first_heading_or_description(path)
         skill_rows.append([link(path, name), desc])
-    lines.append("## Local Skills")
+    lines.append("## Custom Local Skills")
     lines.append("")
     lines.append(table(skill_rows))
     lines.append("")

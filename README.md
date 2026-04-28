@@ -8,14 +8,14 @@ This repo is intended to make the stack easy to inspect, install, and keep in sy
 
 Start here:
 
-- [`docs/catalog.md`](docs/catalog.md) — generated catalog of packages, extensions, agents, and skills with short purpose notes.
+- [`docs/catalog.md`](docs/catalog.md) — generated catalog of packages, custom local extensions/agents/skills, and a consolidated Compound Engineering section.
 - [`docs/pi-packages.md`](docs/pi-packages.md) — package-managed dependencies, source links, and optional/discovered packages.
 - [`docs/privacy-audit-2026-04-28.md`](docs/privacy-audit-2026-04-28.md) — public-sharing privacy audit notes.
 
 Highlights:
 
 - **Council workflow** — premium advisory council agents plus `council-tools.ts` for async completion notifications and `Alt+O` / `/council-runs` browsing.
-- **CE workflow skills** — brainstorm, plan, work, review, commit/PR, debug, demo evidence, docs refresh, and related review personas.
+- **Compound Engineering plugin resources** — brainstorm, plan, work, review, commit/PR, debug, demo evidence, docs refresh, and related review personas. These are consolidated in the catalog and linked to the official CE repo rather than presented as custom config.
 - **Safety/ergonomics extensions** — command guardrails and council review UI.
 - **Package-managed tools** — subagents, ask-user, web access, intercom, FFF search, LSP, themes, and selected git-installed extensions.
 
