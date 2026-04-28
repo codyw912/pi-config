@@ -1,0 +1,30 @@
+{
+  "name": "pi-config",
+  "version": "0.1.0",
+  "description": "Curated Pi agent configuration, agents, skills, and extensions",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codyw912/pi-config.git"
+  },
+  "type": "module",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi-skill"
+  ],
+  "pi": {
+    "extensions": [
+      "./agent/extensions"
+    ],
+    "skills": [
+      "./agent/skills"
+    ]
+  },
+  "scripts": {
+    "catalog": "python3 scripts/update-catalog.py"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*",
+    "@mariozechner/pi-tui": "*"
+  }
+}
