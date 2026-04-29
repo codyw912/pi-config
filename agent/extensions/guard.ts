@@ -119,9 +119,15 @@ const RULES: GuardRule[] = [
   },
   {
     tool: "bash",
-    match: (input) => matchesShellCommand(String(input.command ?? ""), /(?:^|\n|[;|&]{1,2})\s*(?:\S+\/)?pip3?\s/m),
+    match: (input) => matchesShellCommand(String(input.command ?? ""), /(?:^|\n|[;|&]{1,2})\s*(?:\w+=\S+\s+)*(?:\S+\/)?python3?(?:\s|$)/m),
     action: "block",
-    message: "Blocked: use uv instead of pip.",
+    message: "Blocked: use uv for Python execution. Prefer `uv run python ...` or `uv run - <<'PY'`.",
+  },
+  {
+    tool: "bash",
+    match: (input) => matchesShellCommand(String(input.command ?? ""), /(?:^|\n|[;|&]{1,2})\s*(?:\w+=\S+\s+)*(?:\S+\/)?pip3?(?:\s|$)/m),
+    action: "block",
+    message: "Blocked: use uv instead of pip. Prefer `uv add`, `uv run --with <pkg> ...`, or project dependency commands.",
   },
   {
     tool: "bash",

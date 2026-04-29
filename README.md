@@ -116,7 +116,7 @@ just check
 To manually regenerate the catalog after adding/removing agents, skills, extensions, packages, or shared skills:
 
 ```bash
-python3 scripts/update-catalog.py
+uv run python scripts/update-catalog.py
 # or
 npm run catalog
 ```
@@ -126,7 +126,7 @@ To refresh only the tracked shared-skill mirror from your machine's common skill
 ```bash
 ./scripts/sync-shared-skills.sh --dry-run
 ./scripts/sync-shared-skills.sh
-python3 scripts/update-catalog.py
+uv run python scripts/update-catalog.py
 ```
 
 ## Update workflow

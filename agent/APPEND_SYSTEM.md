@@ -26,6 +26,10 @@ If already on non-protected branch, continue there.
 
 If git signing fails, do not bypass. Pause; signing failure means human approval unavailable.
 
+## Python
+
+Do not run `python`, `python3`, `pip`, or `pip3` directly. Use uv: `uv run python ...`, `uv run - <<'PY'`, `uv run --with <pkg> ...`, or project/script-specific uv commands. Only use system Python when the user explicitly requests it.
+
 ## Delegation
 
 Use `subagent` / `intercom` when net efficiency improves time, cost, or context.

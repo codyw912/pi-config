@@ -15,7 +15,7 @@ sync:
 
 # Regenerate docs/catalog.md from tracked local/shared skills
 catalog:
-    python3 scripts/update-catalog.py
+    uv run python scripts/update-catalog.py
 
 # Check repo hygiene and public-sharing scans
 check: catalog
@@ -23,9 +23,9 @@ check: catalog
     bash -n scripts/install-packages.sh
     bash -n scripts/install-shared-skills.sh
     bash -n scripts/sync-shared-skills.sh
-    python3 -m py_compile scripts/update-catalog.py
+    uv run python -m py_compile scripts/update-catalog.py
     @echo "Checking catalog links..."
-    python3 scripts/check-catalog-links.py
+    uv run python scripts/check-catalog-links.py
     @echo "Scanning for high-signal personal paths..."
     @if git grep -n -I -E '(/Users/cody|/Users/[A-Za-z0-9._-]+/\.pi|/Users/[A-Za-z0-9._-]+/dev|/home/[A-Za-z0-9._-]+/\.pi)' -- . ':!justfile' ':!docs/privacy-audit-2026-04-28.md'; then exit 1; else echo "personal path scan ok"; fi
     @echo "Scanning for high-signal secrets..."
@@ -49,7 +49,7 @@ optional-packages-install:
 
 # Compare live ~/.pi/agent/settings.json packages with config/pi-packages.txt
 packages-audit:
-    python3 scripts/audit-packages.py
+    uv run python scripts/audit-packages.py
 
 # Dry-run installing shared skills to ~/.agents/skills
 shared-skills-dry-run:
@@ -66,7 +66,7 @@ shared-skills-sync-dry-run:
 # Sync shared-skills/ from ~/.agents/skills and regenerate catalog
 shared-skills-sync:
     ./scripts/sync-shared-skills.sh
-    python3 scripts/update-catalog.py
+    uv run python scripts/update-catalog.py
 
 # Dry-run symlink install for ~/.pi/agent local config
 install-dry-run:

@@ -1,6 +1,6 @@
 ---
 name: uv-python-commands
-description: Run Python via uv run to avoid touching system Python. Use for one-off execution (scripts, inline commands, stdin/heredocs) and ephemeral deps; avoid system-wide installs.
+description: Mandatory for any Python execution. Use instead of python/python3/pip/pip3 for one-off scripts, inline commands, stdin/heredocs, modules, and ephemeral deps. Always prefer uv run / uv run --with unless the user explicitly requests system Python.
 ---
 
 # Uv Python Commands
@@ -15,14 +15,14 @@ Boundary:
 
 ## Workflow
 
-### 1) Default to uv for any Python execution
+### 1) Always use uv for Python execution
 
-Use uv for:
+Do not run `python`, `python3`, `pip`, or `pip3` directly. Use uv for:
 - Running scripts: `uv run path/to/script.py`
 - Inline commands: `uv run python -c 'print("hi")'`
 - One-off tools: `uv run --with <pkg> python -c '...'`
 
-Avoid `python`, `pip`, or `pip3` directly unless the user explicitly requests system Python.
+This applies even for quick exploration, JSON parsing, repo inspection, heredocs, and throwaway inline snippets. Only use system Python when the user explicitly requests it.
 
 ### 2) Prefer ephemeral deps for ad-hoc work
 

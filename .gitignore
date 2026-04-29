@@ -25,6 +25,8 @@ agent/.pi-lsp.json
 node_modules/
 agent/extensions/node_modules/
 shared-skills/*.skill
+__pycache__/
+*.py[cod]
 
 # Logs/temp
 *.log
