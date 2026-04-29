@@ -21,6 +21,11 @@ agent/.pi-lsp.json
 *.swo
 *~
 
+# Dependencies/generated archives
+node_modules/
+agent/extensions/node_modules/
+shared-skills/*.skill
+
 # Logs/temp
 *.log
 tmp/

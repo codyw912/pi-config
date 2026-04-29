@@ -6,7 +6,14 @@ set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 _default:
     @just --list
 
-# Regenerate docs/catalog.md
+# One-command local sync: pull shared skills into repo, regenerate catalog, validate public hygiene, audit package list, show git status
+sync:
+    ./scripts/sync-shared-skills.sh
+    just check
+    just packages-audit
+    just status
+
+# Regenerate docs/catalog.md from tracked local/shared skills
 catalog:
     python3 scripts/update-catalog.py
 
@@ -20,7 +27,7 @@ check: catalog
     @echo "Checking catalog links..."
     python3 scripts/check-catalog-links.py
     @echo "Scanning for high-signal personal paths..."
-    @if git grep -n -I -E '(/Users/cody|/Users/[A-Za-z0-9._-]+/\.pi|/Users/[A-Za-z0-9._-]+/dev|/home/[A-Za-z0-9._-]+/\.pi)' -- . ':!docs/privacy-audit-2026-04-28.md'; then exit 1; else echo "personal path scan ok"; fi
+    @if git grep -n -I -E '(/Users/cody|/Users/[A-Za-z0-9._-]+/\.pi|/Users/[A-Za-z0-9._-]+/dev|/home/[A-Za-z0-9._-]+/\.pi)' -- . ':!justfile' ':!docs/privacy-audit-2026-04-28.md'; then exit 1; else echo "personal path scan ok"; fi
     @echo "Scanning for high-signal secrets..."
     @if git grep -n -I -E '(sk-[A-Za-z0-9_-]{30,}|gh[pousr]_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{20,}|AIza[0-9A-Za-z_-]{20,}|-----BEGIN (RSA|OPENSSH|PRIVATE) KEY-----|Bearer [A-Za-z0-9._-]{20,})'; then exit 1; else echo "secret scan ok"; fi
 

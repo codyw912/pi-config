@@ -28,7 +28,7 @@ Installed from npm/git with `scripts/install-packages.sh`; not vendored into thi
 
 ## Compound Engineering Resources
 
-This setup includes a local snapshot of **34 skills** and **51 agents** installed by the [Compound Engineering plugin](https://github.com/EveryInc/compound-engineering-plugin). They are treated as upstream plugin resources, not custom pi-config items. See the official CE repository for the canonical source, docs, and update flow.
+This setup includes a local snapshot of **0 skills** and **0 agents** installed by the [Compound Engineering plugin](https://github.com/EveryInc/compound-engineering-plugin). They are treated as upstream plugin resources, not custom pi-config items. See the official CE repository for the canonical source, docs, and update flow.
 
 ## Local Extensions
 
@@ -36,6 +36,7 @@ This setup includes a local snapshot of **34 skills** and **51 agents** installe
 | --- | --- |
 | [`council-tools.ts`](../agent/extensions/council-tools.ts) | Council run browser, `Alt+O` overlay, `/council-runs`, `/council-open`, and async council artifact backfill. |
 | [`guard.ts`](../agent/extensions/guard.ts) | Safety guardrails for risky shell/git commands and secret-decryption operations. |
+| [`prompt-audit.ts`](../agent/extensions/prompt-audit.ts) |  |
 | [`pi-nopii.ts.disabled`](../agent/extensions/pi-nopii.ts.disabled) | Disabled experimental local PII-filter extension; kept off by default. |
 
 ## Custom Local Agents

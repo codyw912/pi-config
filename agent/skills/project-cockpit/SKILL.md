@@ -77,19 +77,23 @@ Do not implement product/code changes in Steward mode unless explicitly asked.
 Close out a meaningful session or chunk.
 
 1. Review what changed in the session.
-2. Update `.project/now.md` when state, validation, blockers, or next chunks changed.
-3. Append to `.project/decisions.md` only for durable decisions with future consequences.
-4. Write `.project/handoffs/YYYY-MM-DD-topic.md` only if context would be expensive to reconstruct.
-5. Final response includes:
+2. If this is an implementation chunk in a git repo and validation passed, commit the completed chunk before stopping unless a valid no-commit condition applies.
+3. Valid no-commit conditions: user asked not to commit, validation failed, unrelated pre-existing changes cannot be safely separated, chunk is exploratory/WIP, repo policy forbids agent commits, or signing/auth/human approval is needed.
+4. Update `.project/now.md` when state, validation, blockers, commit status, or next chunks changed.
+5. Append to `.project/decisions.md` only for durable decisions with future consequences.
+6. Write `.project/handoffs/YYYY-MM-DD-topic.md` only if context would be expensive to reconstruct.
+7. Final response includes:
    - completed chunk
    - validation
-   - commit status if applicable
+   - commit status, including reason if not committed
    - recommended next chunk
    - whether the agent can continue now
 
 ### momentum
 
 Continue through ready, scoped low/medium-risk next chunks from `.project/now.md` until a stop condition.
+
+For implementation chunks in git repos, do not start the next chunk while the current validated chunk is still uncommitted unless a valid no-commit condition applies. Commit coherent validated chunks at chunk boundaries.
 
 Stop when:
 

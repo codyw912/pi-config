@@ -1,13 +1,10 @@
-<!-- BEGIN COMPOUND PI TOOL MAP -->
-## Compound Engineering (Pi compatibility)
+# Pi Agent Config
 
-This block is managed by compound-plugin.
+This setup uses a curated local Pi toolkit rather than the full Compound Engineering plugin.
 
-Pi extensions used by this plugin:
-- Required: `pi-subagents` (by nicobailon) provides the `subagent` tool used by skills that dispatch parallel agents
-- Recommended: `pi-ask-user` (by edlsh) provides the `ask_user` tool; skills fall back to numbered options in chat when it is missing
+Core local pieces:
+- `APPEND_SYSTEM.md` for global operating policy
+- `skills/project-cockpit/` for `.project/` lifecycle workflows
+- `extensions/council-tools.ts` and `agents/council*.md` for async council review
 
-Install with:
-  pi install npm:pi-subagents
-  pi install npm:pi-ask-user
-<!-- END COMPOUND PI TOOL MAP -->
+Compound Engineering is intentionally not installed in this active profile. Reinstall or selectively copy individual CE skills/agents only when needed.
