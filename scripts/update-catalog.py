@@ -27,6 +27,7 @@ EXTENSION_PURPOSES = {
     "council-tools.ts": "Council run browser, `Alt+O` overlay, `/council-runs`, `/council-open`, and async council artifact backfill.",
     "guard.ts": "Safety guardrails for risky shell/git commands and secret-decryption operations.",
     "prompt-audit.ts": "Prompt/token audit commands (`/prompt-audit`, `/prompt-audit-save`) for measuring system prompt, provider payload, and tool schema overhead.",
+    "project-commands.ts": "Slash commands for project cockpit/planning workflows: `/project-status`, `/project-roadmap`, `/project-deepen`, `/project-chunk`, `/project-wrap`, and `/project-momentum`.",
     "pi-nopii.ts.disabled": "Disabled experimental local PII-filter extension; kept off by default.",
 }
 

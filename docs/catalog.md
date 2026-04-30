@@ -36,6 +36,7 @@ This setup includes a local snapshot of **0 skills** and **0 agents** installed 
 | --- | --- |
 | [`council-tools.ts`](../agent/extensions/council-tools.ts) | Council run browser, `Alt+O` overlay, `/council-runs`, `/council-open`, and async council artifact backfill. |
 | [`guard.ts`](../agent/extensions/guard.ts) | Safety guardrails for risky shell/git commands and secret-decryption operations. |
+| [`project-commands.ts`](../agent/extensions/project-commands.ts) | Slash commands for project cockpit/planning workflows: `/project-status`, `/project-roadmap`, `/project-deepen`, `/project-chunk`, `/project-wrap`, and `/project-momentum`. |
 | [`prompt-audit.ts`](../agent/extensions/prompt-audit.ts) | Prompt/token audit commands (`/prompt-audit`, `/prompt-audit-save`) for measuring system prompt, provider payload, and tool schema overhead. |
 | [`pi-nopii.ts.disabled`](../agent/extensions/pi-nopii.ts.disabled) | Disabled experimental local PII-filter extension; kept off by default. |
 

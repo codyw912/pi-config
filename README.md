@@ -15,7 +15,7 @@ Start here:
 Highlights:
 
 - **Curated local profile** — intentionally avoids vendoring the full Compound Engineering plugin surface; reinstall CE upstream or copy individual resources only when needed.
-- **Project cockpit** — lightweight `.project/` workflow for durable project continuity across sessions.
+- **Project cockpit/planning** — lightweight `.project/` continuity plus roadmap/phase/chunk planning, with `/project-*` slash commands.
 - **Council workflow** — premium advisory council agents plus `council-tools.ts` for async completion notifications and `Alt+O` / `/council-runs` browsing.
 - **Prompt audit tooling** — `/prompt-audit` and `/prompt-audit-save` help measure baseline context and tool/schema prompt overhead.
 - **Safety/ergonomics extensions** — command guardrails, council review UI, and local workflow helpers.
