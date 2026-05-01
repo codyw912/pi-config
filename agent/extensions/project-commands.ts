@@ -8,6 +8,14 @@ type CommandSpec = {
 
 const commands: CommandSpec[] = [
   {
+    name: "project-init",
+    description: "Bootstrap or repair .project cockpit structure",
+    prompt: (args) => withArgs(
+      "Use the project-cockpit skill in init mode. Bootstrap or repair the .project cockpit structure for this repo. If .project already exists, read existing brief.md and now.md if present, preserve existing content, create only missing required files/directories, and ask before overwriting or restructuring anything. Required initial structure is .project/brief.md, .project/now.md, .project/decisions.md, and .project/handoffs/.gitkeep. Do not create roadmap.md or phases/ unless I explicitly ask or the project clearly needs planning structure now.",
+      args,
+    ),
+  },
+  {
     name: "project-status",
     description: "Summarize .project cockpit state",
     prompt: (args) => withArgs(
@@ -83,6 +91,7 @@ function runPrompt(pi: ExtensionAPI, ctx: ExtensionCommandContext, prompt: strin
 function helpText(): string {
   return [
     "Project commands:",
+    "  /project-init — bootstrap or repair .project cockpit structure",
     "  /project-status — summarize .project cockpit state",
     "  /project-roadmap [topic] — create/revise long-term roadmap",
     "  /project-deepen <phase> — deepen a roadmap phase",
