@@ -15,6 +15,20 @@ This skill complements `project-cockpit`:
 
 Keep plans useful, not bureaucratic. Prefer enough structure to guide future agents over exhaustive project management.
 
+## Depth and Escalation
+
+Planning commands may include depth hints such as `--deep` or `--council`.
+
+Use deeper reasoning deliberately:
+
+- Standard: small roadmap edits, straightforward phase updates, simple chunking.
+- Deep: nontrivial architecture/product roadmaps, multi-phase projects, unclear sequencing, phase deepening with multiple dependencies, roadmap reviews, or any request containing `--deep`.
+- Council: high-stakes architecture direction, migrations/rewrites, security/privacy/data model choices, expensive-to-reverse sequencing, or any request containing `--council`.
+
+When Deep applies, call `change_reasoning` with `high` before substantive planning. When Council applies, also use high reasoning and run or propose a council review before finalizing the roadmap/phase. Ask first before council if latency/cost is meaningful and the user did not explicitly request `--council`, "stress test", "deep review", or "high confidence".
+
+Prefer subagents for bounded discovery/review when they reduce context load. Keep subagent/council outputs compressed into the plan; do not paste long transcripts.
+
 ## Planning Ladder
 
 ```text
@@ -51,9 +65,10 @@ Infer mode from the user request. If ambiguous, choose the least invasive planni
 
 Create or revise `.project/roadmap.md`.
 
-1. Read `.project/brief.md`, `.project/now.md`, existing roadmap/phase files, and relevant docs/code if present.
-2. Clarify only project-defining unknowns. Ask one focused question at a time.
-3. Draft a roadmap with:
+1. For nontrivial roadmap creation/revision, architecture/product planning, or `--deep`/`--council`, set reasoning to high before substantive planning.
+2. Read `.project/brief.md`, `.project/now.md`, existing roadmap/phase files, and relevant docs/code if present.
+3. Clarify only project-defining unknowns. Ask one focused question at a time.
+4. Draft a roadmap with:
    - objective / north star
    - current state
    - target architecture or end-state
@@ -62,9 +77,10 @@ Create or revise `.project/roadmap.md`.
    - cross-phase risks
    - validation / success measures
    - open questions
-4. For software projects, include architecture boundaries, data/control flow, migration strategy, testing/validation, and operational concerns when relevant.
-5. Keep phases outcome-oriented, not task dumps.
-6. Update `.project/now.md` only if the active planning state or next suggested planning chunk changes.
+5. For software projects, include architecture boundaries, data/control flow, migration strategy, testing/validation, and operational concerns when relevant.
+6. Keep phases outcome-oriented, not task dumps.
+7. Use council before finalizing when roadmap direction is high-stakes or `--council` was requested.
+8. Update `.project/now.md` only if the active planning state or next suggested planning chunk changes.
 
 ### deepen-phase
 
@@ -83,11 +99,11 @@ A phase plan should include:
 - candidate chunks, still rough
 - explicit non-goals
 
-Use subagents/council when the phase is high-risk, architectural, or has meaningful trade-offs. Ask reviewers for missing risks, sequencing problems, validation gaps, and scope creep. Keep their output compressed into the phase plan; do not paste long transcripts.
+Set reasoning to high for nontrivial phase deepening, architectural phases, unclear sequencing, or `--deep`/`--council`. Use subagents/council when the phase is high-risk, architectural, has meaningful trade-offs, or council was requested. Ask reviewers for missing risks, sequencing problems, validation gaps, and scope creep. Keep their output compressed into the phase plan; do not paste long transcripts.
 
 ### chunk-phase
 
-Convert a phase plan into ready chunks suitable for `.project/now.md`.
+Convert a phase plan into ready chunks suitable for `.project/now.md`. Use high reasoning when chunking a complex/vague phase plan or when `--deep`/`--council` is requested.
 
 Each ready chunk must include:
 
@@ -111,7 +127,7 @@ Chunking rules:
 
 ### review-roadmap
 
-Review an existing roadmap or phase plan.
+Review an existing roadmap or phase plan. Set reasoning to high for substantive reviews, `--deep`, or `--council`. Use council for high-stakes architecture reviews or when requested.
 
 Look for:
 

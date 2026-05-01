@@ -27,7 +27,7 @@ const commands: CommandSpec[] = [
     name: "project-roadmap",
     description: "Create or revise .project/roadmap.md",
     prompt: (args) => withArgs(
-      "Use the project-planning skill in roadmap mode. Create or revise .project/roadmap.md from the project brief/current state. Clarify only project-defining unknowns, one focused question at a time. Keep phases outcome-oriented and update .project/now.md only if active planning state or next suggested planning chunks change.",
+      "Use the project-planning skill in roadmap mode. Honor depth args: --deep means call change_reasoning high before substantive planning; --council means use high reasoning and run/propose council review before finalizing. For nontrivial architecture/product roadmaps, use high reasoning even without --deep. Create or revise .project/roadmap.md from the project brief/current state. Clarify only project-defining unknowns, one focused question at a time. Keep phases outcome-oriented and update .project/now.md only if active planning state or next suggested planning chunks change.",
       args,
     ),
   },
@@ -35,7 +35,7 @@ const commands: CommandSpec[] = [
     name: "project-deepen",
     description: "Deepen one roadmap phase into .project/phases/NN-name.md",
     prompt: (args) => withArgs(
-      "Use the project-planning skill in deepen-phase mode. Deepen the requested roadmap phase into a phase plan under .project/phases/. Include goal, dependencies, expected end-state, workstreams, decisions, risks, validation strategy, acceptance criteria, candidate chunks, and non-goals. Use subagents/council only if risk or trade-offs justify it.",
+      "Use the project-planning skill in deepen-phase mode. Honor depth args: --deep means call change_reasoning high before substantive planning; --council means use high reasoning and run/propose council review before finalizing. Deepen the requested roadmap phase into a phase plan under .project/phases/. Include goal, dependencies, expected end-state, workstreams, decisions, risks, validation strategy, acceptance criteria, candidate chunks, and non-goals. Use subagents/council when risk, architecture trade-offs, sequencing complexity, or args justify it.",
       args,
     ),
   },
@@ -43,7 +43,7 @@ const commands: CommandSpec[] = [
     name: "project-chunk",
     description: "Convert a phase plan into ready .project/now.md chunks",
     prompt: (args) => withArgs(
-      "Use the project-planning skill in chunk-phase mode. Convert the requested phase plan into ready chunks for .project/now.md. Each chunk must include title, why, expected files/areas, max scope, dependencies/blockers, validation command, risk, stop/ask condition, and whether human approval is needed. Put only the next few ready chunks in now.md; keep later candidates in the phase plan.",
+      "Use the project-planning skill in chunk-phase mode. Honor depth args: --deep means call change_reasoning high before substantive planning; --council means use high reasoning and run/propose council review if chunk sequencing is high-stakes. Convert the requested phase plan into ready chunks for .project/now.md. Each chunk must include title, why, expected files/areas, max scope, dependencies/blockers, validation command, risk, stop/ask condition, and whether human approval is needed. Put only the next few ready chunks in now.md; keep later candidates in the phase plan.",
       args,
     ),
   },
@@ -67,7 +67,7 @@ const commands: CommandSpec[] = [
     name: "project-review-roadmap",
     description: "Review roadmap or phase plans for gaps",
     prompt: (args) => withArgs(
-      "Use the project-planning skill in review-roadmap mode. Review the existing roadmap and phase plans for unclear success criteria, phase ordering problems, hidden dependencies, missing validation, architectural coupling, migration risk, oversized chunks, stale decisions, and conflicts with .project/decisions.md. Return concise findings and recommended edits; mutate files only if I ask or the request clearly implies stewarding the plan.",
+      "Use the project-planning skill in review-roadmap mode. Call change_reasoning high before substantive review. Honor --council by running/proposing council review before final recommendations. Review the existing roadmap and phase plans for unclear success criteria, phase ordering problems, hidden dependencies, missing validation, architectural coupling, migration risk, oversized chunks, stale decisions, and conflicts with .project/decisions.md. Return concise findings and recommended edits; mutate files only if I ask or the request clearly implies stewarding the plan.",
       args,
     ),
   },
@@ -93,10 +93,10 @@ function helpText(): string {
     "Project commands:",
     "  /project-init — bootstrap or repair .project cockpit structure",
     "  /project-status — summarize .project cockpit state",
-    "  /project-roadmap [topic] — create/revise long-term roadmap",
-    "  /project-deepen <phase> — deepen a roadmap phase",
-    "  /project-chunk <phase> — convert phase plan to ready chunks",
-    "  /project-review-roadmap — review roadmap/phase plans for gaps",
+    "  /project-roadmap [--deep|--council] [topic] — create/revise long-term roadmap",
+    "  /project-deepen [--deep|--council] <phase> — deepen a roadmap phase",
+    "  /project-chunk [--deep|--council] <phase> — convert phase plan to ready chunks",
+    "  /project-review-roadmap [--council] — review roadmap/phase plans for gaps",
     "  /project-wrap — wrap session/chunk, update cockpit, commit if appropriate",
     "  /project-momentum — execute ready chunks until stop condition",
   ].join("\n");
