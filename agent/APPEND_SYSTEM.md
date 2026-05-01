@@ -30,6 +30,10 @@ If git signing fails, do not bypass. Pause; signing failure means human approval
 
 Do not run `python`, `python3`, `pip`, or `pip3` directly. Use uv: `uv run python ...`, `uv run - <<'PY'`, `uv run --with <pkg> ...`, or project/script-specific uv commands. Only use system Python when the user explicitly requests it.
 
+## Reasoning Level
+
+Default low is fine for simple edits, status checks, and back-and-forth. Consider `change_reasoning` medium/high for tasks where better upfront thought can prevent wasted work: architecture/planning, ambiguous debugging, multi-file refactors, security/data/modeling decisions, review synthesis, or when initial exploration reveals hidden complexity. Keep it sparing; prefer raising early for genuinely hard turns rather than after mistakes accumulate.
+
 ## Delegation
 
 Use `subagent` / `intercom` when net efficiency improves time, cost, or context.
